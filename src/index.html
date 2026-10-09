@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>gifget</title>
+    <meta
+      name="description"
+      content="Old-school low-resolution animated GIFs of a word: spins, extruded 3D, glitch, liquid neon, melting slime, decayed files and seamless tiles. Drawn and encoded in your browser."
+    />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0f0d0b" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="gifget" />
+    <meta
+      property="og:description"
+      content="Old-school animated GIF wordmarks and seamless tiles, encoded in the browser."
+    />
+    <meta name="twitter:card" content="summary" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>gifget</h1>
+      <p class="lede">
+        Type a word, pick a look, get a real GIF89a: low resolution, a handful of colours, looping
+        forever. Every frame is drawn and encoded right here — nothing is uploaded.
+      </p>
+
+      <div class="field">
+        <label class="eyebrow" for="word">Word</label>
+        <input id="word" value="zomnbio" maxlength="16" spellcheck="false" autocomplete="off" />
+      </div>
+
+      <div class="eyebrow" id="effect-label">Look</div>
+      <div class="picks" id="picks" role="group" aria-labelledby="effect-label"></div>
+      <p class="note" id="note"></p>
+
+      <div class="controls">
+        <div class="field">
+          <label class="eyebrow" for="colors">Colours</label>
+          <input id="colors" type="number" min="2" max="32" step="1" />
+        </div>
+        <div class="field">
+          <label class="eyebrow" for="delay">Frame ms</label>
+          <input id="delay" type="number" min="20" max="1000" step="10" />
+        </div>
+        <div class="field">
+          <label class="eyebrow" for="crunch">Pixel crunch</label>
+          <select id="crunch">
+            <option value="1">none</option>
+            <option value="2" selected>2×</option>
+            <option value="3">3×</option>
+            <option value="4">4×</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="eyebrow" for="seed">Seed</label>
+          <input id="seed" type="number" min="1" max="999999" step="1" value="1" />
+        </div>
+        <div class="field">
+          <label class="eyebrow" for="zoom">Preview zoom</label>
+          <select id="zoom">
+            <option value="1">1×</option>
+            <option value="2" selected>2×</option>
+            <option value="3">3×</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="reroll" type="button">Reroll</button>
+        <button id="wall" type="button" aria-pressed="false">Tile behind it</button>
+        <a id="download" class="button primary" download="zomnbio.gif" href="#">Download GIF</a>
+      </div>
+
+      <div class="stage" id="stage">
+        <img id="preview" alt="" />
+      </div>
+      <div class="status" id="status" role="status" aria-live="polite">Drawing…</div>
+
+      <footer>
+        <a href="https://en.wikipedia.org/wiki/GIF">What a GIF is</a> ·
+        <a href="https://github.com/jerryaswell/gifget">Source</a>
+      </footer>
+    </main>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

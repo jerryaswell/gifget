@@ -1,0 +1,13 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "env": {
+    "GIT_AUTHOR_NAME": "Jerry Caskey",
+    "GIT_AUTHOR_EMAIL": "jerryaswell@users.noreply.github.com",
+    "GIT_COMMITTER_NAME": "Jerry Caskey",
+    "GIT_COMMITTER_EMAIL": "jerryaswell@users.noreply.github.com"
+  }
+}

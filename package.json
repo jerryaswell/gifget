@@ -1,0 +1,33 @@
+{
+  "name": "gifget",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Old-school low-resolution animated GIF89a wordmarks and seamless tiles, drawn and encoded in the browser.",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/dev.mjs --dist",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "node --test \"test/unit/**/*.test.mjs\"",
+    "test:e2e": "playwright test",
+    "check": "npm run lint && npm run format:check && npm run test:unit && npm run build",
+    "test:a11y": "playwright test test/e2e/a11y.spec.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
+    "axe-core": "^4.13.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.10.0",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.6"
+  }
+}

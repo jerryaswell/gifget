@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Not found · gifget</title>
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0f0d0b" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <style>
+      /* the tokens are copied rather than shared: this page is served on its own,
+         so the duplication is literal, and obvious when it drifts */
+      :root {
+        --ink: #ece6da;
+        --dim: #a59d8f;
+        --paper: #0f0d0b;
+        --accent: #7dff3a;
+      }
+      body {
+        margin: 0;
+        padding: 22px 16px;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+      .eyebrow {
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dim);
+        margin-bottom: 6px;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0 0 5px;
+        color: var(--accent);
+      }
+      p {
+        max-width: 60ch;
+      }
+      a {
+        color: var(--accent);
+      }
+      :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="eyebrow">404</div>
+      <h1>gifget</h1>
+      <p>
+        This frame never finished downloading. Start again from <a href="./">the front page</a>.
+      </p>
+    </main>
+  </body>
+</html>
