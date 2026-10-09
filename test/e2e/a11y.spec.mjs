@@ -14,7 +14,7 @@ const summarise = (violations) =>
     nodes: v.nodes.map((n) => n.target.join(' ')).slice(0, 6),
   }));
 
-const drawn = (page) => expect(page.locator('#status')).not.toHaveText(/Drawing/);
+const drawn = (page) => expect(page.locator('#status')).toHaveText(/ms$/, { timeout: 15_000 });
 
 test('the page has no accessibility violations, cold', async ({ page }) => {
   await page.goto('/');
@@ -32,10 +32,18 @@ test('no violations with the tile behind the mark', async ({ page }) => {
   expect(summarise(violations)).toEqual([]);
 });
 
+test('no violations with a tile chosen and controls turned off', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('radio', { name: 'Seamless tile' }).check();
+  await drawn(page);
+  const { violations } = await audit(page);
+  expect(summarise(violations)).toEqual([]);
+});
+
 test('no violations while a new GIF is being drawn', async ({ page }) => {
   await page.goto('/');
   await drawn(page);
-  await page.getByLabel('Word').fill('voidnet');
+  await page.getByLabel('Word', { exact: true }).fill('voidnet');
   const { violations } = await audit(page);
   expect(summarise(violations)).toEqual([]);
 });

@@ -12,7 +12,11 @@ export function rng(seed) {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-  next.int = (lo, hi) => lo + Math.floor(next() * (hi - lo + 1));
+  // whole numbers only, even from fractional bounds such as w / 4
+  next.int = (lo, hi) => {
+    const a = Math.ceil(lo);
+    return a + Math.floor(next() * (Math.floor(hi) - a + 1));
+  };
   next.pick = (list) => list[Math.floor(next() * list.length)];
   next.chance = (p) => next() < p;
   return next;

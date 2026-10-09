@@ -2,8 +2,9 @@
 /**
  * Build the site into dist/.
  *
- * The page ships as a single self-contained file: the stylesheet and the module
- * graph under src/lib are bundled and inlined into index.html, so the whole
+ * The page ships as a single self-contained file: the stylesheet, the module
+ * graph under src/lib and the drawing worker are bundled and inlined into
+ * index.html, so the whole
  * thing is one request and one file you can also just save and open. Everything
  * in public/ is copied across untouched.
  *
@@ -59,9 +60,10 @@ async function build() {
   await rm(dist, { recursive: true, force: true });
   await mkdir(dist, { recursive: true });
 
-  const [css, js, template] = await Promise.all([
+  const [css, js, worker, template] = await Promise.all([
     bundle('styles.css', 'css'),
     bundle('main.js', 'js'),
+    bundle('worker.js', 'js'),
     readFile(path.join(src, 'index.html'), 'utf8'),
   ]);
 
@@ -72,7 +74,17 @@ async function build() {
 
   const html = template
     .replace(STYLESHEET, () => '<style>\n' + css + '\n    </style>')
-    .replace(SCRIPT, () => '<script>\n' + js + '\n    </script>');
+    // the worker rides along as inert text, which the page turns into a Blob
+    // URL: a worker needs a script of its own, and the page has no second file
+    .replace(
+      SCRIPT,
+      () =>
+        '<script type="text/plain" id="worker-src">\n' +
+        worker.replace(/<\/script/gi, '<\\/script') +
+        '\n    </script>\n    <script>\n' +
+        js +
+        '\n    </script>'
+    );
 
   await writeFile(path.join(dist, 'index.html'), html);
   await cp(publicDir, dist, { recursive: true });

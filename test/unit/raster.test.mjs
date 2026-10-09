@@ -44,6 +44,25 @@ test('a wrapped row tear rotates each row, so a tile stays seamless', () => {
   }
 });
 
+test('a fractional shift still moves whole pixels', () => {
+  // a fractional tear once read pixels a byte or two out of line: alpha leaked
+  // into green and drew bright stripes across the frame
+  const img = raster(10, 2, [5, 2, 1]);
+  tearRows(img, 0, 1, -37.5 / 10);
+  tearCols(img, 0, 9, 1.5);
+  for (let i = 0; i < img.data.length; i += 4) {
+    assert.deepEqual([...img.data.subarray(i, i + 4)], [5, 2, 1, 255]);
+  }
+});
+
+test('random whole numbers stay whole, even from fractional bounds', () => {
+  const random = rng(8);
+  for (let i = 0; i < 200; i++) {
+    const n = random.int(-37.5, 37.5);
+    assert.ok(Number.isInteger(n) && n >= -37 && n <= 37, String(n));
+  }
+});
+
 test('a column tear moves pixels down, wrapping', () => {
   const img = noise(4, 6, 4);
   const top = px(img, 1, 0);

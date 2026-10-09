@@ -104,6 +104,7 @@ export function displace(img, map, { wrap = false, fill = [0, 0, 0] } = {}) {
  * only rotates each row, so it never breaks a seamless tile.
  */
 export function tearRows(img, y0, y1, dx) {
+  dx = Math.round(dx);
   const row = new Uint8ClampedArray(img.w * 4);
   for (let y = Math.max(0, y0); y <= Math.min(img.h - 1, y1); y++) {
     const start = y * img.w * 4;
@@ -118,6 +119,7 @@ export function tearRows(img, y0, y1, dx) {
 
 /** The vertical counterpart of tearRows: columns x0..x1 shifted by dy. */
 export function tearCols(img, x0, x1, dy) {
+  dy = Math.round(dy);
   const col = new Uint8ClampedArray(img.h * 4);
   for (let x = Math.max(0, x0); x <= Math.min(img.w - 1, x1); x++) {
     for (let y = 0; y < img.h; y++)
@@ -132,6 +134,8 @@ export function tearCols(img, x0, x1, dy) {
 
 /** Move one colour channel by (dx, dy): chromatic aberration. */
 export function offsetChannel(img, channel, dx, dy, { wrap = true } = {}) {
+  dx = Math.round(dx);
+  dy = Math.round(dy);
   const src = new Uint8ClampedArray(img.data);
   for (let y = 0; y < img.h; y++) {
     for (let x = 0; x < img.w; x++) {

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const drawn = (page) => expect(page.locator('#status')).not.toHaveText(/Drawing/);
+const drawn = (page) => expect(page.locator('#status')).toHaveText(/ms$/, { timeout: 15_000 });
 
 /** Decode the previewed GIF with the browser's own decoder. */
 const decodePreview = (page) =>
@@ -25,76 +25,106 @@ const decodePreview = (page) =>
 test('the page opens on a drawn GIF, ready to download', async ({ page }) => {
   await page.goto('/');
   await drawn(page);
-  await expect(page.getByRole('button', { name: 'Borked' })).toHaveAttribute(
-    'aria-pressed',
-    'true'
-  );
   const download = page.getByRole('link', { name: 'Download GIF' });
   await expect(download).toHaveAttribute('href', /^blob:/);
-  await expect(download).toHaveAttribute('download', 'zomnbio_borked.gif');
+  await expect(download).toHaveAttribute('download', 'zomnbio-1.gif');
   await expect(page.locator('#preview')).toHaveAttribute('alt', /zomnbio/);
-  const natural = await page
-    .locator('#preview')
-    .evaluate((img) => img.decode().then(() => img.naturalWidth));
-  expect(natural).toBe(300);
-});
-
-test('the browser decodes it as an endlessly looping animation', async ({ page }) => {
-  await page.goto('/');
-  await drawn(page);
   const gif = await decodePreview(page);
   expect(gif).toMatchObject({ frames: 24, width: 300, height: 130 });
   expect(gif.repetition).toBe(Infinity);
   expect(gif.duration).toBe(90_000); // microseconds
 });
 
-test('every look draws, and its defaults come with it', async ({ page }) => {
+test('the word typed in is the word drawn and the file named', async ({ page }) => {
   await page.goto('/');
-  const buttons = page.locator('#picks button');
-  const count = await buttons.count();
-  expect(count).toBeGreaterThanOrEqual(10);
-  for (let i = 0; i < count; i++) {
-    const button = buttons.nth(i);
-    await button.click();
-    await expect(button).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('#picks [aria-pressed="true"]')).toHaveCount(1);
-    await drawn(page);
-    const gif = await decodePreview(page);
-    expect(gif.frames).toBeGreaterThan(1);
-  }
-});
-
-test('a new word renames the download', async ({ page }) => {
-  await page.goto('/');
-  await page.getByLabel('Word').fill('VOIDNET');
-  await page.getByRole('button', { name: 'Cyan chrome' }).click();
+  await page.getByLabel('Word', { exact: true }).fill('VOID NET');
   await drawn(page);
+  await expect(page.locator('#preview')).toHaveAttribute('alt', /VOID NET/);
   await expect(page.getByRole('link', { name: 'Download GIF' })).toHaveAttribute(
     'download',
-    'voidnet_chrome.gif'
+    'void-net-1.gif'
   );
+});
+
+test('style, animation, effects, colours, lettering and canvas all reach the GIF', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await drawn(page);
+  await page.getByLabel('Style').selectOption({ label: 'Chrome' });
+  await page.getByLabel('Animation').selectOption({ label: 'Bounce' });
+  await page.getByRole('checkbox', { name: 'Decay' }).uncheck();
+  await page.getByRole('checkbox', { name: 'Glint' }).check();
+  await page.getByRole('checkbox', { name: 'Scanlines' }).check();
+  await page.getByLabel('Face', { exact: true }).fill('#ff00aa');
+  await page.getByLabel('Font').selectOption({ label: 'Bitmap 5×7' });
+  await page.getByLabel('Width').fill('200');
+  await page.getByLabel('Height').fill('80');
+  await page.getByLabel('Frames').fill('10');
+  await page.getByLabel('Frame ms').fill('50');
+  await drawn(page);
+
+  const gif = await decodePreview(page);
+  expect(gif).toMatchObject({ frames: 10, width: 200, height: 80, duration: 50_000 });
+  const hash = new URLSearchParams(page.url().split('#')[1]);
+  expect(hash.get('style')).toBe('chrome');
+  expect(hash.get('animation')).toBe('bounce');
+  expect(hash.get('effects')).toBe('glint,scanlines');
+  expect(hash.get('face')).toBe('#ff00aa');
+  expect(hash.get('font')).toBe('bitmap');
+  await expect(page.locator('#preview')).toHaveAttribute('alt', /chrome, bounce, glint, scanlines/);
+});
+
+test('every style, animation and effect can be picked', async ({ page }) => {
+  await page.goto('/');
+  await drawn(page);
+  const styles = await page.locator('#style option').count();
+  const animations = await page.locator('#animation option').count();
+  const effects = await page.locator('#effects input').count();
+  expect(styles).toBeGreaterThanOrEqual(7);
+  expect(animations).toBeGreaterThanOrEqual(10);
+  expect(effects).toBeGreaterThanOrEqual(9);
+  for (let i = 0; i < styles; i++) {
+    await page.locator('#style').selectOption({ index: i });
+    await page.locator('#animation').selectOption({ index: i % animations });
+    await drawn(page);
+  }
+  for (const box of await page.locator('#effects input').all()) await box.check();
+  await drawn(page);
+  expect((await decodePreview(page)).frames).toBe(24);
+});
+
+test('a preset fills the form but keeps the word and seed', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('Word', { exact: true }).fill('hello');
+  await page.getByLabel('Seed').fill('42');
+  await page.getByRole('button', { name: 'Deep 3D' }).click();
+  await drawn(page);
+  await expect(page.getByLabel('Style')).toHaveValue('extrude');
+  await expect(page.getByLabel('Animation')).toHaveValue('rock');
+  await expect(page.getByLabel('Word', { exact: true })).toHaveValue('hello');
+  await expect(page.getByLabel('Seed')).toHaveValue('42');
+  // and anything can be changed afterwards
+  await page.getByLabel('Animation').selectOption({ label: '2D spin' });
+  await drawn(page);
+  expect(page.url()).toContain('animation=spin');
 });
 
 test('the settings live in the address, so a link brings the same GIF back', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Liquid neon' }).click();
   await page.getByLabel('Seed').fill('4242');
-  await page.getByLabel('Colours').fill('6');
+  await page.getByLabel('Palette size').fill('6');
   await drawn(page);
   const url = page.url();
-  expect(url).toContain('effect=wave');
-  expect(url).toContain('seed=4242');
-
   const first = await page.locator('#status').textContent();
+
   await page.goto('about:blank');
   await page.goto(url);
   await drawn(page);
-  await expect(page.getByRole('button', { name: 'Liquid neon' })).toHaveAttribute(
-    'aria-pressed',
-    'true'
-  );
+  await expect(page.getByLabel('Style')).toHaveValue('shadow');
+  await expect(page.getByRole('checkbox', { name: 'Liquid wave' })).toBeChecked();
   await expect(page.getByLabel('Seed')).toHaveValue('4242');
-  // same size, frames and colours: the drawing time is the only thing that may differ
   const strip = (s) => s.replace(/ · drawn in \d+ ms/, '');
   expect(strip(await page.locator('#status').textContent())).toBe(strip(first));
 });
@@ -107,26 +137,47 @@ test('reroll picks a new seed', async ({ page }) => {
   await expect(page.getByLabel('Seed')).not.toHaveValue('1');
 });
 
-test('the tile can sit behind the mark, and shows itself repeating', async ({ page }) => {
+test('a tile turns off what it cannot use, and shows itself repeating', async ({ page }) => {
+  await page.goto('/');
+  await drawn(page);
+  await page.getByRole('radio', { name: 'Seamless tile' }).check();
+  await drawn(page);
+  await expect(page.getByLabel('Style')).toBeDisabled();
+  await expect(page.getByLabel('Word', { exact: true })).toBeDisabled();
+  await expect(page.getByRole('checkbox', { name: 'Melt' })).toBeDisabled();
+  await expect(page.getByRole('checkbox', { name: 'Decay' })).toBeEnabled();
+  await expect(page.locator('#stage')).toHaveCSS('background-image', /blob:/);
+  await expect(page.getByRole('link', { name: 'Download GIF' })).toHaveAttribute(
+    'download',
+    'tile-1.gif'
+  );
+});
+
+test('the tile can sit behind a wordmark', async ({ page }) => {
   await page.goto('/');
   await drawn(page);
   const stage = page.locator('#stage');
   await expect(stage).toHaveCSS('background-image', 'none');
-
   const wall = page.getByRole('button', { name: 'Tile behind it' });
   await wall.click();
   await expect(wall).toHaveAttribute('aria-pressed', 'true');
   await drawn(page);
   await expect(stage).toHaveCSS('background-image', /blob:/);
+});
 
-  await wall.click();
-  await page.getByRole('button', { name: 'Seamless tile' }).click();
+test('a heavy GIF does not freeze the page while it draws', async ({ page }) => {
+  await page.goto('/');
   await drawn(page);
-  await expect(stage).toHaveCSS('background-image', /blob:/);
-  await expect(page.getByRole('link', { name: 'Download GIF' })).toHaveAttribute(
-    'download',
-    'tile_tile.gif'
-  );
+  for (const box of await page.locator('#effects input').all()) await box.check();
+  await page.getByLabel('Width').fill('400');
+  await page.getByLabel('Height').fill('240');
+  await page.getByLabel('Frames').fill('60');
+  await page.waitForTimeout(200);
+  // the main thread answers while the worker draws
+  const started = Date.now();
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(r)));
+  expect(Date.now() - started).toBeLessThan(500);
+  await drawn(page);
 });
 
 test('the page fits a phone without scrolling sideways', async ({ page }) => {

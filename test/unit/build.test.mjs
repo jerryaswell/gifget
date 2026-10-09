@@ -25,27 +25,51 @@ test('the stylesheet and the script are inlined, not linked', async () => {
 });
 
 test('the whole module graph is bundled, not just the entry point', () => {
-  assert.ok(html.includes('Seamless tile'), 'the effect list came along');
+  assert.ok(html.includes('Liquid wave'), 'the effect list came along');
+  assert.ok(html.includes('Bitmap marquee'), 'and the presets');
   assert.ok(html.includes('NETSCAPE2.0'), 'and the encoder with it');
   assert.ok(!html.includes('import '), 'nothing left to resolve at runtime');
+});
+
+test('the drawing worker is inlined too, as inert text', () => {
+  assert.match(
+    html,
+    /<script type="text\/plain" id="worker-src">[\s\S]*postMessage[\s\S]*<\/script>/
+  );
 });
 
 test('the markup the script needs is there', () => {
   for (const id of [
     'word',
-    'picks',
-    'note',
+    'presets',
+    'controls',
+    'outputs',
+    'look',
+    'style',
+    'animation',
+    'effects',
+    'strength',
+    'face',
+    'accent',
+    'ground',
     'colors',
+    'lettering',
+    'font',
+    'weight',
+    'size',
+    'width',
+    'height',
+    'frames',
     'delay',
     'crunch',
     'seed',
-    'zoom',
     'reroll',
-    'wall',
-    'download',
     'stage',
     'preview',
     'status',
+    'download',
+    'wall',
+    'zoom',
   ]) {
     assert.ok(html.includes('id="' + id + '"'), 'missing #' + id);
   }

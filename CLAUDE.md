@@ -18,9 +18,14 @@ the SHA and the comment together. Never replace a SHA with a bare tag.
 
 ## The pipeline's rules
 
-Keep the rules in README.md, "How a GIF gets made": low resolution, a small palette, a dark ground,
-an endless loop, and quantize last. Any randomness must come from the seeded `rng`, never from
-`Math.random`. The effects unit tests enforce all of this for every look.
+Keep the rules in README.md, "How a GIF gets made": low resolution, a small palette, a dark ground
+for the presets, an endless loop, and quantize last. Any randomness inside `src/lib` must come
+from the seeded `rng`, never from `Math.random`.
+
+Styles, animations, effects, fonts and presets are registries (README.md, "Adding a style,
+animation, effect, font or preset"). The page builds its controls from them. Never hard-code
+one of them into the page or the pipeline. Every value from the form or the URL goes through
+`normalize()` in `src/lib/settings.js` before the pipeline sees it.
 
 ## Authorship — no Claude attribution
 

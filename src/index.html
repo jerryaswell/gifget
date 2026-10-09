@@ -6,7 +6,7 @@
     <title>gifget</title>
     <meta
       name="description"
-      content="Old-school low-resolution animated GIFs of a word: spins, extruded 3D, glitch, liquid neon, melting slime, decayed files and seamless tiles. Drawn and encoded in your browser."
+      content="Type a word and build an old-school, low-resolution animated GIF from it: pick a style, an animation and any mix of effects, set the colours, lettering, size and timing. Drawn and encoded in your browser."
     />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0f0d0b" />
@@ -15,7 +15,7 @@
     <meta property="og:title" content="gifget" />
     <meta
       property="og:description"
-      content="Old-school animated GIF wordmarks and seamless tiles, encoded in the browser."
+      content="Old-school animated GIF wordmarks and seamless tiles, built from a word and encoded in the browser."
     />
     <meta name="twitter:card" content="summary" />
     <link rel="stylesheet" href="./styles.css" />
@@ -24,61 +24,157 @@
     <main class="wrap">
       <h1>gifget</h1>
       <p class="lede">
-        Type a word, pick a look, get a real GIF89a: low resolution, a handful of colours, looping
-        forever. Every frame is drawn and encoded right here — nothing is uploaded.
+        Type a word and build a real GIF89a from it: low resolution, a handful of colours, looping
+        forever. Choose a style, an animation and any mix of effects, or start from a preset and
+        change whatever you like. Every frame is drawn and encoded here, and nothing is uploaded.
       </p>
 
       <div class="field">
         <label class="eyebrow" for="word">Word</label>
-        <input id="word" value="zomnbio" maxlength="16" spellcheck="false" autocomplete="off" />
+        <input id="word" value="zomnbio" maxlength="24" spellcheck="false" autocomplete="off" />
       </div>
 
-      <div class="eyebrow" id="effect-label">Look</div>
-      <div class="picks" id="picks" role="group" aria-labelledby="effect-label"></div>
-      <p class="note" id="note"></p>
+      <div class="eyebrow" id="presets-label">Start from a preset</div>
+      <div class="picks" id="presets" role="group" aria-labelledby="presets-label"></div>
 
-      <div class="controls">
-        <div class="field">
-          <label class="eyebrow" for="colors">Colours</label>
-          <input id="colors" type="number" min="2" max="32" step="1" />
-        </div>
-        <div class="field">
-          <label class="eyebrow" for="delay">Frame ms</label>
-          <input id="delay" type="number" min="20" max="1000" step="10" />
-        </div>
-        <div class="field">
-          <label class="eyebrow" for="crunch">Pixel crunch</label>
-          <select id="crunch">
-            <option value="1">none</option>
-            <option value="2" selected>2×</option>
-            <option value="3">3×</option>
-            <option value="4">4×</option>
-          </select>
-        </div>
-        <div class="field">
-          <label class="eyebrow" for="seed">Seed</label>
-          <input id="seed" type="number" min="1" max="999999" step="1" value="1" />
-        </div>
-        <div class="field">
-          <label class="eyebrow" for="zoom">Preview zoom</label>
-          <select id="zoom">
-            <option value="1">1×</option>
-            <option value="2" selected>2×</option>
-            <option value="3">3×</option>
-          </select>
-        </div>
-      </div>
+      <div class="layout">
+        <form class="controls" id="controls" autocomplete="off">
+          <fieldset>
+            <legend>Output</legend>
+            <div class="radios" id="outputs"></div>
+            <p class="note" id="output-note"></p>
+          </fieldset>
 
-      <div class="actions">
-        <button id="reroll" type="button">Reroll</button>
-        <button id="wall" type="button" aria-pressed="false">Tile behind it</button>
-        <a id="download" class="button primary" download="zomnbio.gif" href="#">Download GIF</a>
-      </div>
+          <fieldset id="look">
+            <legend>Style and animation</legend>
+            <div class="row">
+              <div class="field">
+                <label class="eyebrow" for="style">Style</label>
+                <select id="style" aria-describedby="style-note"></select>
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="animation">Animation</label>
+                <select id="animation" aria-describedby="animation-note"></select>
+              </div>
+            </div>
+            <p class="note" id="style-note"></p>
+            <p class="note" id="animation-note"></p>
+          </fieldset>
 
-      <div class="stage" id="stage">
-        <img id="preview" alt="" />
+          <fieldset>
+            <legend>Effects</legend>
+            <div class="checks" id="effects"></div>
+            <div class="field">
+              <label class="eyebrow" for="strength"
+                >Intensity <output id="strength-out" for="strength"></output
+              ></label>
+              <input id="strength" type="range" min="1" max="3" step="1" />
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Colours</legend>
+            <div class="row">
+              <div class="field">
+                <label class="eyebrow" for="face">Face</label>
+                <input id="face" type="color" />
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="accent">Accent</label>
+                <input id="accent" type="color" />
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="ground">Ground</label>
+                <input id="ground" type="color" />
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="colors">Palette size</label>
+                <input id="colors" type="number" min="2" max="32" step="1" />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset id="lettering">
+            <legend>Lettering</legend>
+            <div class="row">
+              <div class="field">
+                <label class="eyebrow" for="font">Font</label>
+                <select id="font"></select>
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="weight">Weight</label>
+                <select id="weight">
+                  <option value="bold">Bold</option>
+                  <option value="normal">Regular</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="size"
+                  >Text size <output id="size-out" for="size"></output
+                ></label>
+                <input id="size" type="range" min="15" max="90" step="1" />
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Canvas and timing</legend>
+            <div class="row">
+              <div class="field">
+                <label class="eyebrow" for="width">Width</label>
+                <input id="width" type="number" min="32" max="400" step="4" />
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="height">Height</label>
+                <input id="height" type="number" min="32" max="240" step="4" />
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="frames">Frames</label>
+                <input id="frames" type="number" min="1" max="60" step="1" />
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="delay">Frame ms</label>
+                <input id="delay" type="number" min="20" max="1000" step="10" />
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="crunch">Pixel crunch</label>
+                <select id="crunch">
+                  <option value="1">None</option>
+                  <option value="2">2×</option>
+                  <option value="3">3×</option>
+                  <option value="4">4×</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="eyebrow" for="seed">Seed</label>
+                <span class="inline">
+                  <input id="seed" type="number" min="1" max="999999" step="1" />
+                  <button id="reroll" type="button">Reroll</button>
+                </span>
+              </div>
+            </div>
+          </fieldset>
+        </form>
+
+        <section class="output" aria-label="Result">
+          <div class="stage" id="stage">
+            <img id="preview" alt="" />
+          </div>
+          <div class="status" id="status" role="status" aria-live="polite">Drawing…</div>
+          <div class="actions">
+            <a id="download" class="button primary" download="zomnbio.gif" href="#">Download GIF</a>
+            <button id="wall" type="button" aria-pressed="false">Tile behind it</button>
+            <label class="inline" for="zoom"
+              ><span class="eyebrow">Zoom</span>
+              <select id="zoom">
+                <option value="1">1×</option>
+                <option value="2" selected>2×</option>
+                <option value="3">3×</option>
+              </select></label
+            >
+          </div>
+        </section>
       </div>
-      <div class="status" id="status" role="status" aria-live="polite">Drawing…</div>
 
       <footer>
         <a href="https://en.wikipedia.org/wiki/GIF">What a GIF is</a> ·
